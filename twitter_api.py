@@ -1,3 +1,4 @@
+from keyword import iskeyword
 import tweepy
 import configparser
 import pandas as pd
@@ -28,8 +29,6 @@ nlp = spacy.load('en_core_web_lg')
 
 
 
-
-
 #get credentials
 
 config = configparser.ConfigParser()
@@ -50,62 +49,6 @@ auth = tweepy.OAuthHandler(api_key, api_key_secret)
 auth.set_access_token(access_token, access_token_secret)
 
 api = tweepy.API(auth)
-
-
-
-
-#test if api connection is working
-public_tweets = api.home_timeline()
-#for tweet in public_tweets:
-#    print(tweet.text)
-
-
-
-#checking panda functionality
-columns = ['Time', 'User', 'Tweet']
-data = []
-for tweet in public_tweets:
-    data.append([tweet.created_at, tweet.user.screen_name, tweet.text])
-
-#print(data)
-
-#adding tweets to dataframe to be saveable
-df = pd.DataFrame(data, columns = columns)
-#print(df)
-
-#saving tweets to csv file
-#df.to_csv( 'tweets.csv')
-
-
-###########################################################################################
-
-#getting tweets from specific user
-user = 'BarackObama'
-limit = 10
-
-#tweepy method of bypassing twitter 200 limit, set limit above 200 if using this version
-#user_tweets = tweepy.Cursor(api.user_timeline,  screen_name = user, 
-#count = 200, tweet_mode = 'extended').items(limit)
-
-#without using limit bypass
-user_tweets = api.user_timeline(screen_name = user,count = limit, tweet_mode = 'extended' )
-
-#for tweet in user_tweets:
-#    print( tweet.full_text)
-
-
-#saving user tweets to dataframe and saving it
-user_columns = ['User', 'Tweet']
-user_data = []
-
-for tweet in user_tweets:
-    user_data.append([tweet.user.screen_name, tweet.full_text])
-
-user_df = pd.DataFrame(user_data, columns = user_columns)
-
-#print(user_df)
-#user_df.to_csv( 'user_tweets.csv')
-
 
 #####################################################################################
 
@@ -136,11 +79,8 @@ keyword_df = pd.DataFrame(keyword_data, columns = keyword_columns)
 #print(keyword_df)
 #keyword_df.to_csv( 'keyword_tweets.csv')
 
+#################################################################################################
 
-#########################################################################################################3
-
-
-#obtaining more data and simple analysis
 
 user = 'BarackObama'
 limit = 100
@@ -168,22 +108,52 @@ user_df2 = pd.DataFrame( {'tweets':tweets, 'likes':likes, 'time':time} )
 mostLiked = user_df2.loc[user_df2.likes.nlargest(10).index]
 #print(mostLiked)
 
+#########################################################################################################3
 
+#a function that gets user input of what they want to search
+#then runs word analysis on the tweets obtained
 
-#make sure matplotlib working right
-#plt.plot([1,2,3,4], [1,4,9,16])
-#plt.ylabel('y numbers')
-#plt.xlabel('x numbers')
-#plt.show()
+def userSearch():
+    limit = 100
+    text = []
+    IsUserSearch = False
+    isKeywordSearch = False
+
+    #getting user input about what they want to search
+    userinput = input('Do you want to search a user? Type YES or NO\n')
+
+    if userinput == 'YES':
+        searchInput = input('What user do you want to search? \n')
+        isUserSearch = True
+
+    if userinput == 'NO':
+        searchInput = input('What keyword do you want to search? \n')
+        isKeywordSearch = True
+
+    #obtaining tweets based off username or keyword
+    if isUserSearch == True:
+        input_tweets = tweepy.Cursor(api.user_timeline,  screen_name = searchInput, 
+        count = 200, tweet_mode = 'extended').items(limit)
+    if isKeywordSearch == True:
+        input_tweets = tweepy.Cursor(api.search_tweets,  q = searchInput, 
+        count = 200, tweet_mode = 'extended').items(limit)
+
+    #remove retweets
+    for tweet in input_tweets:
+        if( tweet.retweeted == False and 'RT @' not in tweet.full_text): 
+            text.append(tweet.full_text)
+
+    input_df = pd.DataFrame( {'text': text })
+    #getting just the words
+    input_df = input_df['text']
+
 
 
 ###############################################################################################
 
 #more in depth semantic/word analysis with spacy using user tweets
 
-#tweets between these dates
-begin_data = (2022, 8, 1)
-end_date = (2022, 8, 15)
+
 
 limit = 300
 lang = 'english'
@@ -340,4 +310,6 @@ plt.title('Top People Mentioned')
 plt.ylabel('Word From Tweet', fontsize = 12)
 plt.xlabel('Count Of Words', fontsize = 12)
 plt.tight_layout()
-plt.show()
+#plt.show()
+
+userSearch()
