@@ -63,7 +63,7 @@ def userSearch():
     nlp = spacy.load('en_core_web_lg')
     limit = 100
     text = []
-    IsUserSearch = False
+    isUserSearch = False
     isKeywordSearch = False
 
     #getting user input about what they want to search
@@ -149,9 +149,9 @@ def userSearch():
 
     #now that we have the data for analysis time to store it in 
     #a new dataframe to use for visualizations
-    analysis_df2 = pd.DataFrame(stem2)
+    input_df2 = pd.DataFrame(stem2)
     #group words on count
-    analysis_df2 = analysis_df2[0].value_counts()
+    input_df2 = input_df2[0].value_counts()
 
     #print( analysis_df2)
 
@@ -163,9 +163,9 @@ def userSearch():
 
     #word count analysis 
     #doing visualizations
-    analysis_df2 = analysis_df2[:30,]
+    input_df2 = input_df2[:30,]
     plt.figure( figsize = (10,5))
-    sns.barplot( x = analysis_df2.values, y = analysis_df2.index, alpha = 0.8)
+    sns.barplot( x = input_df2.values, y = input_df2.index, alpha = 0.8)
 
     plt.title('Top Words Used')
     plt.ylabel('Word From Tweet', fontsize = 12)
@@ -191,9 +191,9 @@ def userSearch():
 
     label = [ (X.text, X.label_) for X in stem2.ents]
 
-    analysis_df3 = pd.DataFrame( label, columns = ['Word', 'Entity'])
+    input_df3 = pd.DataFrame( label, columns = ['Word', 'Entity'])
 
-    org_df = analysis_df3.where( analysis_df3['Entity'] == 'ORG')
+    org_df = input_df3.where( input_df3['Entity'] == 'ORG')
     org_df = org_df['Word'].value_counts()
     #org visualization
     org_df = org_df[:20,]
@@ -215,9 +215,9 @@ def userSearch():
 
     label2 = [ (X.text, X.label_) for X in stem2.ents]
 
-    analysis_df4 = pd.DataFrame( label2, columns = ['Word', 'Entity'])
+    input_df4 = pd.DataFrame( label2, columns = ['Word', 'Entity'])
 
-    person_df = analysis_df4.where( analysis_df4['Entity'] == 'PERSON')
+    person_df = input_df4.where( input_df4['Entity'] == 'PERSON')
     person_df = person_df['Word'].value_counts()
 
 
